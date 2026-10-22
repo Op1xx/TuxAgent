@@ -1,0 +1,12 @@
+# Только для ПК с RTX 2070 (Turing, sm_75). На ноутбук не ставить.
+# torch устанавливать CUDA-сборкой с официального index-url PyTorch;
+# версия должна совпадать с пином ниже.
+torch==2.14.1
+
+# transformers 4.x: bitsandbytes 0.50.2 тестируется с transformers<5.
+transformers==4.57.6
+peft==0.21.2
+bitsandbytes==0.50.2
+datasets==5.1.0
+accelerate==1.15.0
+trl==1.16.0

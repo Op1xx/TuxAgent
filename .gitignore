@@ -218,3 +218,22 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# TuxAgent: runtime data (app creates this directory)
+data/*
+!data/.gitkeep
+
+# TuxAgent: local models and ML artifacts
+models/
+*.gguf
+*.safetensors
+*.ckpt
+*.pt
+*.pth
+runs/
+checkpoints/
+wandb/
+
+# TuxAgent: packaging
+*.AppImage
+*.AppImage.zsync
