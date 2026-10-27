@@ -29,11 +29,11 @@
 ## Текущий фокус
 
 - Этап: **1 — каркас приложения и GUI**.
-- Инфраструктура готова: `AGENTS.md`, `TODO.md`, раздельные requirements, `.venv` на Python 3.13.
+- Инфраструктура и каркас готовы: `AGENTS.md`, `TODO.md`, requirements, `.venv` на Python 3.13, `pyproject.toml`, плоский `src/`.
 - Следующие 3 задачи:
-  1. Добавить `pyproject.toml` (метаданные, src-layout, entry point, ruff/pytest) и создать пакет `src/tuxagent/` с рабочим `main.py`.
-  2. Собрать главное окно в `ui/main_window.ui` + `resources/main.qss`.
-  3. Добавить offscreen smoke-тест, прогнать `pytest -q` и подключить минимальный CI.
+  1. Реализовать `app.py`: `QApplication`, загрузка `.qss`, глобальный обработчик ошибок.
+  2. Собрать `ui/main_window.ui` и `resources/main.qss`.
+  3. Написать контроллер окна и offscreen smoke-тест, прогнать `pytest -q`.
 
 ## 0. Инфраструктура и окружение
 
@@ -48,9 +48,10 @@
 
 ## 1. Каркас приложения и GUI
 
-- [ ] Добавить `pyproject.toml`: метаданные, src-layout, entry point, настройки ruff и pytest.
-- [ ] Создать пакет `src/tuxagent/` (`__init__.py`, `__main__.py`).
-- [ ] Сделать `main.py` тонким лаунчером без бизнес-логики.
+- [x] Добавить `pyproject.toml`: метаданные, src-layout, entry point, настройки ruff и pytest.
+- [x] Создать плоский `src/` с модулями (`app`, `config`, `main_window`, `agent`, `llm`, `distro`, `package_managers`, `tools`, `safety`, `version`).
+- [x] Сделать `main.py` тонким лаунчером без бизнес-логики.
+- [x] Создать `app.py` с точкой входа-заглушкой.
 - [ ] Реализовать `app.py`: `QApplication`, загрузка `.qss`, глобальный обработчик ошибок.
 - [ ] Сделать `ui/main_window.ui`: поле ввода, кнопка запуска, статус, план действий, история, кнопка настроек.
 - [ ] Сделать `resources/main.qss`: базовая тема, читаемые состояния ( idle / thinking / running / waiting / error / done ).
@@ -194,13 +195,15 @@
 ## Журнал решений
 
 - **2026-10-22.** Python 3.13, Linux-only; разработка в venv, системный Python 3.14 не использовать.
-- **2026-10-22.** Структура `src/tuxagent/`, `ui/`, `resources/`, `tests/`, `data/` только для runtime.
+- **2026-10-22.** Структура: `src/`, `ui/`, `resources/`, `tests/`, `data/` только для runtime.
 - **2026-10-22.** Безопасные действия выполняются автоматически; подтверждение — только для необратимого/критического; неоднозначность — уточняющий вопрос.
 - **2026-10-22.** Инференс на ноутбуке — CPU + llama.cpp/GGUF; Ollama — для экспериментов; GTX 950M не использовать.
 - **2026-10-22.** Стартовая модель — 3B в Q4; 7–8B на 8 ГБ RAM не тянуть.
 - **2026-10-22.** Матрица дистрибутивов v1: apt, dnf, pacman, zypper, ALT apt (+epm опционально).
 - **2026-10-22.** Зависимости разделены на runtime / dev / ml; ML-стек только на ПК с RTX 2070.
 - **2026-10-22.** AppImage — финальный этап, после работающего MVP.
+- **2026-10-27.** Добавлены `pyproject.toml`, плоский `src/` и entry point `tuxagent`; проект устанавливается через `pip install -e .`.
+- **2026-10-27.** Убран пакет `src/tuxagent/`: код лежит прямо в `src/`, импорты вида `from app import main`, entry point `app:main`. Корневой `ui/` — только `.ui`-разметка.
 
 ## Передача сессии
 

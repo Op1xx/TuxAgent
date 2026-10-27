@@ -11,7 +11,7 @@
 
 ## Текущее состояние
 
-Инфраструктура готова: `AGENTS.md`, `TODO.md`, раздельные requirements, `.venv` на Python 3.13. Кода приложения ещё нет. Следующие шаги — в `TODO.md`; не выдумывай реализацию, сначала создай её.
+Каркас готов: `pyproject.toml`, плоский каталог `src/` с модулями-заглушками и тонкий `main.py`. GUI и логика агента ещё не реализованы: `app.py` — заглушка. Следующие шаги — в `TODO.md`; не выдумывай реализацию, сначала создай её.
 
 ## Приоритеты
 
@@ -32,19 +32,25 @@
 
 ```text
 main.py                  # тонкий лаунчер
-src/tuxagent/
+src/
+  __main__.py            # python src/__main__.py
   app.py                 # QApplication, загрузка .ui/.qss
-  ui/                    # контроллеры окон (не разметка)
-  core/                  # агентный цикл, планировщик, исполнитель
-  llm/                   # base.py, mock.py, llama_cpp.py, ollama.py
-  system/                # distro.py, package_managers/
-  tools/                 # типизированные инструменты
-  safety/                # политика, верификация, dry-run
-ui/                      # *.ui
+  config.py              # настройки приложения
+  main_window.py         # контроллер главного окна
+  agent.py               # агентный цикл
+  llm.py                 # LLMBackend: mock, llama.cpp, Ollama
+  distro.py              # определение дистрибутива
+  package_managers.py    # apt, dnf, pacman, zypper, ALT
+  tools.py               # типизированные инструменты
+  safety.py              # политика, верификация, dry-run
+  version.py             # __version__
+ui/                      # *.ui (только разметка Qt Designer)
 resources/               # *.qss, иконки
 tests/                   # pytest, фикстуры
 data/                    # runtime: логи, audit, кэш; в git не хранится
 ```
+
+`src/` — плоский каталог модулей, не пакет. Импорты вида `from app import main`, entry point `app:main`, запуск через `python main.py` или `python src/__main__.py`. Не создавать подпапки без необходимости и не добавлять зависимости с именами `app`, `config`, `tools` и т.п., чтобы не перекрыть модули. Если `llm.py` или `package_managers.py` разрастутся, тогда их можно разбить на пакеты.
 
 Модели хранить в `~/.local/share/tuxagent/models` (XDG), не в репозитории.
 
@@ -102,12 +108,15 @@ data/                    # runtime: логи, audit, кэш; в git не хра�
 
 ## Команды
 
-Окружение уже создано: `.venv` на Python 3.13, runtime и dev установлены. `main.py` пока пустой, тестов ещё нет — команды запуска начнут работать после этапа 1.
+Окружение создано: `.venv` на Python 3.13, runtime + dev установлены, проект установлен в editable-режиме. `main.py` запускает заглушку; GUI ещё нет.
 
 ```bash
 python3.13 -m venv .venv
 .venv/bin/pip install -r requirements-dev.txt   # runtime + dev
+.venv/bin/pip install -e .                      # проект + entry point
 .venv/bin/python main.py
+.venv/bin/tuxagent
+.venv/bin/python src/__main__.py
 .venv/bin/pytest -q
 .venv/bin/pytest tests/test_distro.py::test_detect_astra -q
 .venv/bin/ruff check .

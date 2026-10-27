@@ -1,0 +1,67 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tuxagent"
+description = "Локальный русскоязычный ИИ-агент для Linux"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+license = "MIT"
+license-files = ["LICENSE"]
+dynamic = ["version", "dependencies"]
+
+[project.scripts]
+tuxagent = "app:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+py-modules = [
+    "agent",
+    "app",
+    "config",
+    "distro",
+    "llm",
+    "main_window",
+    "package_managers",
+    "safety",
+    "tools",
+    "version",
+]
+
+[tool.setuptools.dynamic]
+version = {attr = "version.__version__"}
+dependencies = {file = ["requirements.txt"]}
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "agent",
+    "app",
+    "config",
+    "distro",
+    "llm",
+    "main_window",
+    "package_managers",
+    "safety",
+    "tools",
+    "version",
+]
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"
+qt_api = "pyqt6"
+markers = [
+    "gui: тесты, требующие Qt-приложения",
+    "slow: долгие тесты",
+]
