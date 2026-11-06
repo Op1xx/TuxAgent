@@ -18,12 +18,13 @@ from config import (
     ensure_runtime_dirs,
     load_settings,
 )
+from logging_setup import configure_logging
 from main_window import MainWindow
 from version import __version__
 
 logger = logging.getLogger(__name__)
 
-THEME_FILES = {"dark": "main.qss"}
+THEME_FILES = {"dark": "main.qss", "light": "light.qss"}
 
 
 def _load_fonts() -> None:
@@ -88,7 +89,10 @@ def main(argv: list[str] | None = None) -> int:
     """Запустить приложение."""
     settings = load_settings()
     ensure_runtime_dirs(settings)
+    configure_logging(settings)
+    logger.info("Запуск TuxAgent %s", __version__)
     app = create_application(argv, settings)
     window = MainWindow(settings)
+    window.settings_changed.connect(lambda new_settings: apply_stylesheet(app, new_settings))
     window.show()
     return app.exec()

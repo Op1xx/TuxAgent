@@ -12,7 +12,7 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>360</width>
+    <width>760</width>
     <height>480</height>
    </size>
   </property>
@@ -80,6 +80,34 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="tasksBtn">
+        <property name="minimumSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>32</width>
+          <height>32</height>
+         </size>
+        </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
+        <property name="toolTip">
+         <string>Показать или скрыть задачи</string>
+        </property>
+        <property name="text">
+         <string>☰</string>
+        </property>
+        <property name="active" stdset="0">
+         <bool>false</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="spacer_1">
         <property name="orientation">
          <enum>Qt::Orientation::Horizontal</enum>
@@ -133,11 +161,11 @@
             <height>28</height>
            </size>
           </property>
-          <property name="focusPolicy">
-           <enum>Qt::FocusPolicy::NoFocus</enum>
-          </property>
           <property name="cursor">
            <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::NoFocus</enum>
           </property>
           <property name="toolTip">
            <string>Свернуть</string>
@@ -161,11 +189,11 @@
             <height>28</height>
            </size>
           </property>
-          <property name="focusPolicy">
-           <enum>Qt::FocusPolicy::NoFocus</enum>
-          </property>
           <property name="cursor">
            <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::NoFocus</enum>
           </property>
           <property name="toolTip">
            <string>Развернуть</string>
@@ -189,11 +217,11 @@
             <height>28</height>
            </size>
           </property>
-          <property name="focusPolicy">
-           <enum>Qt::FocusPolicy::NoFocus</enum>
-          </property>
           <property name="cursor">
            <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+          <property name="focusPolicy">
+           <enum>Qt::FocusPolicy::NoFocus</enum>
           </property>
           <property name="toolTip">
            <string>Закрыть</string>
@@ -225,6 +253,184 @@
      <property name="bottomMargin">
       <number>0</number>
      </property>
+     <item>
+      <widget class="QFrame" name="tasksPanel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>280</width>
+         <height>0</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>280</width>
+         <height>16777215</height>
+        </size>
+       </property>
+       <property name="visible">
+        <bool>false</bool>
+       </property>
+       <layout class="QVBoxLayout" name="tasksOuterLayout">
+        <property name="spacing">
+         <number>0</number>
+        </property>
+        <property name="leftMargin">
+         <number>17</number>
+        </property>
+        <property name="topMargin">
+         <number>24</number>
+        </property>
+        <property name="rightMargin">
+         <number>17</number>
+        </property>
+        <property name="bottomMargin">
+         <number>18</number>
+        </property>
+        <item>
+         <layout class="QHBoxLayout" name="tasksHeadLayout">
+          <property name="spacing">
+           <number>8</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>0</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>0</number>
+          </property>
+          <item>
+           <widget class="QLabel" name="tasksTitle">
+            <property name="text">
+             <string>Задачи</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="tasksHeadSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>0</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <widget class="QLabel" name="tasksChat">
+          <property name="text">
+           <string>Новый чат</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLabel" name="tasksContext">
+          <property name="text">
+           <string>Контекст запроса появится здесь.</string>
+          </property>
+          <property name="wordWrap">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <spacer name="tasksTopSpacer">
+          <property name="orientation">
+           <enum>Qt::Orientation::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Policy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>0</width>
+            <height>16</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QScrollArea" name="tasksScroll">
+          <property name="frameShape">
+           <enum>QFrame::Shape::NoFrame</enum>
+          </property>
+          <property name="horizontalScrollBarPolicy">
+           <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+          </property>
+          <property name="widgetResizable">
+           <bool>true</bool>
+          </property>
+          <widget class="QWidget" name="tasksContent">
+           <property name="geometry">
+            <rect>
+             <x>0</x>
+             <y>0</y>
+             <width>100</width>
+             <height>134</height>
+            </rect>
+           </property>
+           <layout class="QVBoxLayout" name="tasksListLayout">
+            <property name="spacing">
+             <number>8</number>
+            </property>
+            <property name="leftMargin">
+             <number>0</number>
+            </property>
+            <property name="topMargin">
+             <number>2</number>
+            </property>
+            <property name="rightMargin">
+             <number>0</number>
+            </property>
+            <property name="bottomMargin">
+             <number>12</number>
+            </property>
+            <item>
+             <widget class="QLabel" name="tasksEmpty">
+              <property name="text">
+               <string>Пока задач нет.
+План появится, когда агент начнёт работу.</string>
+              </property>
+              <property name="wordWrap">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <spacer name="tasksSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Vertical</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>0</width>
+                <height>40</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </widget>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </item>
      <item>
       <widget class="QFrame" name="main">
        <property name="sizePolicy">
@@ -338,19 +544,48 @@
                      <number>15</number>
                     </property>
                     <item row="0" column="0" alignment="Qt::AlignmentFlag::AlignHCenter">
-                     <widget class="QLabel" name="title">
-                      <property name="text">
-                       <string>&lt;span style=&quot;letter-spacing:-4px;&quot;&gt;&lt;span style=&quot;color:#e8e5ed;&quot;&gt;Tux&lt;/span&gt;&lt;span style=&quot;color:#a477ed;&quot;&gt;Agent&lt;/span&gt;&lt;/span&gt;</string>
+                     <layout class="QHBoxLayout" name="titleLayout">
+                      <property name="spacing">
+                       <number>0</number>
                       </property>
-                      <property name="textFormat">
-                       <enum>Qt::TextFormat::RichText</enum>
+                      <property name="leftMargin">
+                       <number>0</number>
                       </property>
-                     </widget>
+                      <property name="topMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="rightMargin">
+                       <number>0</number>
+                      </property>
+                      <property name="bottomMargin">
+                       <number>0</number>
+                      </property>
+                      <item>
+                       <widget class="QLabel" name="titleTux">
+                        <property name="text">
+                         <string>&lt;span style=&quot;letter-spacing:-4px;&quot;&gt;Tux&lt;/span&gt;</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::TextFormat::RichText</enum>
+                        </property>
+                       </widget>
+                      </item>
+                      <item>
+                       <widget class="QLabel" name="titleAgent">
+                        <property name="text">
+                         <string>&lt;span style=&quot;letter-spacing:-4px;&quot;&gt;Agent&lt;/span&gt;</string>
+                        </property>
+                        <property name="textFormat">
+                         <enum>Qt::TextFormat::RichText</enum>
+                        </property>
+                       </widget>
+                      </item>
+                     </layout>
                     </item>
                     <item row="1" column="0" alignment="Qt::AlignmentFlag::AlignHCenter">
                      <widget class="QLabel" name="tagline">
                       <property name="text">
-                       <string>&lt;span style=&quot;letter-spacing:3px;&quot;&gt;YOUR LOCAL INTELLIGENCE · NO CLOUD · NO LIMITS&lt;/span&gt;</string>
+                       <string>&lt;span style=&quot;letter-spacing:3px;&quot;&gt;ВАШ ЛОКАЛЬНЫЙ АГЕНТ · БЕЗ ИНТЕРНЕТА · БЕЗ ЛИМИТОВ&lt;/span&gt;</string>
                       </property>
                       <property name="textFormat">
                        <enum>Qt::TextFormat::RichText</enum>
@@ -1021,8 +1256,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>256</width>
-             <height>688</height>
+             <width>258</width>
+             <height>676</height>
             </rect>
            </property>
            <layout class="QVBoxLayout" name="chatListLayout">
@@ -1041,705 +1276,6 @@
             <property name="bottomMargin">
              <number>0</number>
             </property>
-            <item>
-             <widget class="QFrame" name="chat1">
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="chat" stdset="0">
-               <bool>true</bool>
-              </property>
-              <property name="active" stdset="0">
-               <bool>true</bool>
-              </property>
-              <layout class="QHBoxLayout" name="chat1Layout" stretch="0,1,0">
-               <property name="spacing">
-                <number>12</number>
-               </property>
-               <property name="leftMargin">
-                <number>8</number>
-               </property>
-               <property name="topMargin">
-                <number>11</number>
-               </property>
-               <property name="rightMargin">
-                <number>9</number>
-               </property>
-               <property name="bottomMargin">
-                <number>11</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="chat1Icon">
-                 <property name="text">
-                  <string>▤</string>
-                 </property>
-                 <property name="chatIcon" stdset="0">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="chat1Info">
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="chat1Name">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Новый чат</string>
-                   </property>
-                   <property name="chatName" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="chat1Time">
-                   <property name="text">
-                    <string>Только что</string>
-                   </property>
-                   <property name="chatTime" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-               <item>
-                <widget class="QFrame" name="chat1Dot">
-                 <property name="minimumSize">
-                  <size>
-                   <width>6</width>
-                   <height>6</height>
-                  </size>
-                 </property>
-                 <property name="maximumSize">
-                  <size>
-                   <width>6</width>
-                   <height>6</height>
-                  </size>
-                 </property>
-                 <property name="dot" stdset="0">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QFrame" name="chat2">
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="chat" stdset="0">
-               <bool>true</bool>
-              </property>
-              <property name="active" stdset="0">
-               <bool>false</bool>
-              </property>
-              <layout class="QHBoxLayout" name="chat2Layout" stretch="0,1">
-               <property name="spacing">
-                <number>12</number>
-               </property>
-               <property name="leftMargin">
-                <number>8</number>
-               </property>
-               <property name="topMargin">
-                <number>11</number>
-               </property>
-               <property name="rightMargin">
-                <number>9</number>
-               </property>
-               <property name="bottomMargin">
-                <number>11</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="chat2Icon">
-                 <property name="text">
-                  <string>▤</string>
-                 </property>
-                 <property name="chatIcon" stdset="0">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="chat2Info">
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="chat2Name">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Code review</string>
-                   </property>
-                   <property name="chatName" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="chat2Time">
-                   <property name="text">
-                    <string>2 ч назад</string>
-                   </property>
-                   <property name="chatTime" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QFrame" name="chat3">
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="chat" stdset="0">
-               <bool>true</bool>
-              </property>
-              <property name="active" stdset="0">
-               <bool>false</bool>
-              </property>
-              <layout class="QHBoxLayout" name="chat3Layout" stretch="0,1">
-               <property name="spacing">
-                <number>12</number>
-               </property>
-               <property name="leftMargin">
-                <number>8</number>
-               </property>
-               <property name="topMargin">
-                <number>11</number>
-               </property>
-               <property name="rightMargin">
-                <number>9</number>
-               </property>
-               <property name="bottomMargin">
-                <number>11</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="chat3Icon">
-                 <property name="text">
-                  <string>▤</string>
-                 </property>
-                 <property name="chatIcon" stdset="0">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="chat3Info">
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="chat3Name">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Идеи для проекта</string>
-                   </property>
-                   <property name="chatName" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="chat3Time">
-                   <property name="text">
-                    <string>1 д назад</string>
-                   </property>
-                   <property name="chatTime" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QFrame" name="chat4">
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="chat" stdset="0">
-               <bool>true</bool>
-              </property>
-              <property name="active" stdset="0">
-               <bool>false</bool>
-              </property>
-              <layout class="QHBoxLayout" name="chat4Layout" stretch="0,1">
-               <property name="spacing">
-                <number>12</number>
-               </property>
-               <property name="leftMargin">
-                <number>8</number>
-               </property>
-               <property name="topMargin">
-                <number>11</number>
-               </property>
-               <property name="rightMargin">
-                <number>9</number>
-               </property>
-               <property name="bottomMargin">
-                <number>11</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="chat4Icon">
-                 <property name="text">
-                  <string>▤</string>
-                 </property>
-                 <property name="chatIcon" stdset="0">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="chat4Info">
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="chat4Name">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Изучение Rust</string>
-                   </property>
-                   <property name="chatName" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="chat4Time">
-                   <property name="text">
-                    <string>2 д назад</string>
-                   </property>
-                   <property name="chatTime" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QFrame" name="chat5">
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="chat" stdset="0">
-               <bool>true</bool>
-              </property>
-              <property name="active" stdset="0">
-               <bool>false</bool>
-              </property>
-              <layout class="QHBoxLayout" name="chat5Layout" stretch="0,1">
-               <property name="spacing">
-                <number>12</number>
-               </property>
-               <property name="leftMargin">
-                <number>8</number>
-               </property>
-               <property name="topMargin">
-                <number>11</number>
-               </property>
-               <property name="rightMargin">
-                <number>9</number>
-               </property>
-               <property name="bottomMargin">
-                <number>11</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="chat5Icon">
-                 <property name="text">
-                  <string>▤</string>
-                 </property>
-                 <property name="chatIcon" stdset="0">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="chat5Info">
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="chat5Name">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Архитектура системы</string>
-                   </property>
-                   <property name="chatName" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="chat5Time">
-                   <property name="text">
-                    <string>3 д назад</string>
-                   </property>
-                   <property name="chatTime" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QFrame" name="chat6">
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="chat" stdset="0">
-               <bool>true</bool>
-              </property>
-              <property name="active" stdset="0">
-               <bool>false</bool>
-              </property>
-              <layout class="QHBoxLayout" name="chat6Layout" stretch="0,1">
-               <property name="spacing">
-                <number>12</number>
-               </property>
-               <property name="leftMargin">
-                <number>8</number>
-               </property>
-               <property name="topMargin">
-                <number>11</number>
-               </property>
-               <property name="rightMargin">
-                <number>9</number>
-               </property>
-               <property name="bottomMargin">
-                <number>11</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="chat6Icon">
-                 <property name="text">
-                  <string>▤</string>
-                 </property>
-                 <property name="chatIcon" stdset="0">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="chat6Info">
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="chat6Name">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Поиск ошибок</string>
-                   </property>
-                   <property name="chatName" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="chat6Time">
-                   <property name="text">
-                    <string>3 д назад</string>
-                   </property>
-                   <property name="chatTime" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QFrame" name="chat7">
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="chat" stdset="0">
-               <bool>true</bool>
-              </property>
-              <property name="active" stdset="0">
-               <bool>false</bool>
-              </property>
-              <layout class="QHBoxLayout" name="chat7Layout" stretch="0,1">
-               <property name="spacing">
-                <number>12</number>
-               </property>
-               <property name="leftMargin">
-                <number>8</number>
-               </property>
-               <property name="topMargin">
-                <number>11</number>
-               </property>
-               <property name="rightMargin">
-                <number>9</number>
-               </property>
-               <property name="bottomMargin">
-                <number>11</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="chat7Icon">
-                 <property name="text">
-                  <string>▤</string>
-                 </property>
-                 <property name="chatIcon" stdset="0">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="chat7Info">
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="chat7Name">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>AI Agents</string>
-                   </property>
-                   <property name="chatName" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="chat7Time">
-                   <property name="text">
-                    <string>4 д назад</string>
-                   </property>
-                   <property name="chatTime" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-            </item>
-            <item>
-             <widget class="QFrame" name="chat8">
-              <property name="cursor">
-               <cursorShape>PointingHandCursor</cursorShape>
-              </property>
-              <property name="chat" stdset="0">
-               <bool>true</bool>
-              </property>
-              <property name="active" stdset="0">
-               <bool>false</bool>
-              </property>
-              <layout class="QHBoxLayout" name="chat8Layout" stretch="0,1">
-               <property name="spacing">
-                <number>12</number>
-               </property>
-               <property name="leftMargin">
-                <number>8</number>
-               </property>
-               <property name="topMargin">
-                <number>11</number>
-               </property>
-               <property name="rightMargin">
-                <number>9</number>
-               </property>
-               <property name="bottomMargin">
-                <number>11</number>
-               </property>
-               <item>
-                <widget class="QLabel" name="chat8Icon">
-                 <property name="text">
-                  <string>▤</string>
-                 </property>
-                 <property name="chatIcon" stdset="0">
-                  <bool>true</bool>
-                 </property>
-                </widget>
-               </item>
-               <item>
-                <layout class="QVBoxLayout" name="chat8Info">
-                 <property name="spacing">
-                  <number>5</number>
-                 </property>
-                 <property name="leftMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="topMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="rightMargin">
-                  <number>0</number>
-                 </property>
-                 <property name="bottomMargin">
-                  <number>0</number>
-                 </property>
-                 <item>
-                  <widget class="QLabel" name="chat8Name">
-                   <property name="sizePolicy">
-                    <sizepolicy hsizetype="Ignored" vsizetype="Preferred">
-                     <horstretch>0</horstretch>
-                     <verstretch>0</verstretch>
-                    </sizepolicy>
-                   </property>
-                   <property name="text">
-                    <string>Custom workflow</string>
-                   </property>
-                   <property name="chatName" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                 <item>
-                  <widget class="QLabel" name="chat8Time">
-                   <property name="text">
-                    <string>5 д назад</string>
-                   </property>
-                   <property name="chatTime" stdset="0">
-                    <bool>true</bool>
-                   </property>
-                  </widget>
-                 </item>
-                </layout>
-               </item>
-              </layout>
-             </widget>
-            </item>
             <item>
              <spacer name="spacer_12">
               <property name="orientation">

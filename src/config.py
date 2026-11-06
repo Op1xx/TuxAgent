@@ -38,6 +38,7 @@ LLM_BACKENDS: dict[str, str] = {
 
 THEMES: dict[str, str] = {
     "dark": "Тёмная",
+    "light": "Светлая",
 }
 
 

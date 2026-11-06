@@ -21,8 +21,11 @@ QFrame#mainVignette {
 QFrame#topbar { background: transparent; border: 0; border-bottom: 1px solid #242229; }
 QLabel#promptMark { color: #a477ed; font-size: 18px; font-weight: 700; }
 QLabel#brandSmall { font-family: "Space Grotesk"; font-size: 13px; font-weight: 600; color: #dddddd; }
-QPushButton#menuBtn { border: 1px solid #38343e; background: #151419; color: #aaa5b1;
-  border-radius: 4px; padding: 5px 9px; font-family: Arial; font-size: 13px; }
+QPushButton#menuBtn, QPushButton#tasksBtn { border: 1px solid #38343e; background: #151419;
+  color: #aaa5b1; border-radius: 4px; padding: 5px 9px; font-family: Arial; font-size: 13px; }
+QPushButton#menuBtn:hover, QPushButton#tasksBtn:hover { border-color: #8a6cb0; color: #f1ecf7; }
+QPushButton#menuBtn[active="true"], QPushButton#tasksBtn[active="true"] {
+  background: #1d1924; border-color: #8a6cb0; color: #f1ecf7; }
 QPushButton#btnMin, QPushButton#btnMax, QPushButton#btnClose {
   background: #141319; border: 1px solid #38343e; border-radius: 4px; padding: 0;
   color: #aaa5b1; font-family: Arial; font-size: 18px; }
@@ -41,7 +44,9 @@ QWidget#hintRow { background: transparent; }
 
 /* ── приветствие ── */
 QLabel#watermark { font-size: 145px; color: rgba(41,35,47,92); }
-QLabel#title { font-family: "Space Grotesk"; font-size: 76px; font-weight: 700; }
+QLabel#titleTux, QLabel#titleAgent { font-family: "Space Grotesk"; font-size: 76px; font-weight: 700; }
+QLabel#titleTux { color: #e8e5ed; }
+QLabel#titleAgent { color: #a477ed; }
 QLabel#tagline { color: #77727e; font-size: 11px; }
 
 QFrame#promptFrame { background: rgba(17,16,21,224); border: 1px solid #49424f;
@@ -76,6 +81,28 @@ QLabel[kind="answer"]  { background: #17141d; border: 1px solid #24212b; border-
 QFrame#composeFrame { background: rgba(17,16,21,240); border: 1px solid #49424f;
   border-left: 3px solid #a477ed; }
 
+/* ── панель задач ── */
+QFrame#tasksPanel { background: rgba(13,13,16,245); border: 1px solid #29262e;
+  border-right: 1px solid #39313f; }
+QLabel#tasksTitle { font-family: "Space Grotesk"; font-size: 18px; font-weight: 600; }
+QLabel#tasksChat { color: #c6c1cb; font-size: 12px; padding: 14px 0 4px 0; }
+QLabel#tasksContext { color: #716c78; font-size: 10px; }
+QLabel#tasksEmpty { color: #5f5b65; font-size: 10px; padding: 8px 0; }
+QFrame[task="true"] { background: transparent; border: 1px solid transparent;
+  border-left: 3px solid #3a3444; border-radius: 4px; }
+QFrame[task="true"]:hover { background: #17151c; border-color: #302b36;
+  border-left-color: #5f5b65; }
+QFrame[task="true"][status="running"] { background: #17141d; border-color: #302b36;
+  border-left-color: #a477ed; }
+QFrame[task="true"][status="done"] { border-left-color: #78c99a; }
+QFrame[task="true"][status="error"] { border-left-color: #e14b5a; }
+QLabel[taskMarker="true"] { font-size: 14px; color: #716c78; background: transparent; border: 0; }
+QLabel[taskTitle="true"] { font-size: 11px; color: #c6c1cb; background: transparent; border: 0; }
+QLabel[taskDetail="true"] { font-size: 10px; color: #716c78; background: transparent; border: 0; }
+QFrame[task="true"][status="running"] QLabel[taskMarker="true"] { color: #a477ed; }
+QFrame[task="true"][status="done"] QLabel[taskMarker="true"] { color: #78c99a; }
+QFrame[task="true"][status="error"] QLabel[taskMarker="true"] { color: #ff8b9a; }
+
 /* ── сайдбар ── */
 QFrame#sidebar { background: rgba(13,13,16,245); border: 1px solid #29262e; border-left: 1px solid #39313f; }
 QLabel#sideTitle { font-family: "Space Grotesk"; font-size: 18px; font-weight: 600; }
@@ -93,6 +120,9 @@ QLabel[chatIcon="true"] { color: #9d97a4; font-size: 17px; background: transpare
 QLabel[chatName="true"] { color: #c6c1cb; font-size: 12px; background: transparent; border: 0; }
 QLabel[chatTime="true"] { color: #716c78; font-size: 10px; background: transparent; border: 0; }
 QFrame[dot="true"] { background: #a477ed; border: 0; border-radius: 3px; }
+QPushButton[chatDelete="true"] { background: transparent; border: 0; color: #5f5b65;
+  font-family: Arial; font-size: 15px; padding: 0; }
+QPushButton[chatDelete="true"]:hover { background: #2a1a20; border-radius: 3px; color: #ff8b9a; }
 
 QFrame#sideBottom { background: transparent; border: 0; border-top: 1px solid #302c34; }
 QPushButton#settingsBtn { background: transparent; border: 0; color: #aaa5b1; font-size: 12px;
