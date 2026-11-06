@@ -11,15 +11,15 @@
 
 ## Текущее состояние
 
-Каркас готов: `pyproject.toml`, плоский `src/` с модулями-заглушками, тонкий `main.py`. `app.py` пока печатает строку и возвращает 0; остальные модули — только docstring. `ui/`, `resources/`, `tests/` пусты (`.gitkeep`). GUI и логика агента не реализованы — не выдумывай существующую реализацию, создавай её по `TODO.md`.
+Каркас и GUI-заготовка готовы: `pyproject.toml`, плоский `src/`, тонкий `main.py`. `app.py` создаёт `QApplication`, грузит шрифты и `resources/main.qss`, ставит глобальный обработчик ошибок. `main_window.py` — рабочий контроллер окна, `settings_dialog.py` — диалог настроек. Разметка: `ui/main_window.ui`, `ui/settings_dialog.ui`; стили: `resources/main.qss`. Агент, пакетные менеджеры, логирование и audit пока не реализованы — не выдумывай существующую реализацию, создавай её по `TODO.md`.
 
 ## Окружение и команды
 
-- Нужен Python 3.13 (`pyproject.toml`: `>=3.13,<3.14`). Системный `python3` здесь — 3.14, а `python3.13` сейчас отсутствует: сначала установи 3.13, потом создавай venv. Глобально зависимости не ставить (PEP 668).
-- `.venv` в git не хранится и сейчас отсутствует — создай его перед запуском.
+- Нужен Python 3.11 (`pyproject.toml`: `>=3.11,<3.12`). Системный `python3` здесь — 3.14, используй `/usr/bin/python3.11`. Глобально зависимости не ставить (PEP 668).
+- `.venv` в git не хранится; создай его перед запуском.
 
 ```bash
-python3.13 -m venv .venv
+python3.11 -m venv .venv
 .venv/bin/pip install -r requirements-dev.txt   # runtime + dev
 .venv/bin/pip install -e .                      # нужен для импорта app из src
 .venv/bin/python main.py
@@ -50,6 +50,7 @@ src/
   app.py                 # QApplication, загрузка .ui/.qss
   config.py              # настройки приложения
   main_window.py         # контроллер главного окна
+  settings_dialog.py     # контроллер диалога настроек
   agent.py               # агентный цикл
   llm.py                 # LLMBackend: mock, llama.cpp, Ollama
   distro.py              # определение дистрибутива
@@ -71,7 +72,8 @@ data/                    # runtime: логи, audit, кэш; в git не хра�
 ## GUI
 
 - Разметка — только `ui/*.ui` (Qt Designer), стили — только `resources/*.qss`. Запрещено собирать окна вручную в Python и держать стили в коде.
-- `main_window.py` — контроллер: сигналы/слоты, без прямых вызовов пакетных менеджеров.
+- Все окна используют общий `resources/main.qss`; новые диалоги оформляются теми же object-name/свойствами, что и `main_window.ui`.
+- `main_window.py` — контроллер: сигналы/слоты, без прямых вызовов пакетных менеджеров. `settings_dialog.py` — только чтение/запись полей диалога, настройки хранит `config.py` (QSettings).
 - Долгие операции — в worker/QThread, главный поток GUI не блокировать.
 
 ## Поток выполнения

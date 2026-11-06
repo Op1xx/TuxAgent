@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "tuxagent"
 description = "Локальный русскоязычный ИИ-агент для Linux"
 readme = "README.md"
-requires-python = ">=3.13,<3.14"
+requires-python = ">=3.11,<3.12"
 license = "MIT"
 license-files = ["LICENSE"]
 dynamic = ["version", "dependencies"]
@@ -25,6 +25,7 @@ py-modules = [
     "main_window",
     "package_managers",
     "safety",
+    "settings_dialog",
     "tools",
     "version",
 ]
@@ -34,7 +35,7 @@ version = {attr = "version.__version__"}
 dependencies = {file = ["requirements.txt"]}
 
 [tool.ruff]
-target-version = "py313"
+target-version = "py311"
 line-length = 100
 src = ["src", "tests"]
 
@@ -51,6 +52,7 @@ known-first-party = [
     "main_window",
     "package_managers",
     "safety",
+    "settings_dialog",
     "tools",
     "version",
 ]
