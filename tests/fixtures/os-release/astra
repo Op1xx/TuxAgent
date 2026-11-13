@@ -1,0 +1,9 @@
+# Синтетическая фикстура: точный набор полей на живой Astra не проверялся.
+PRETTY_NAME="Astra Linux (Orel)"
+NAME="Astra Linux"
+VERSION_ID="2.12"
+VERSION="2.12 (Orel)"
+ID=astra
+ID_LIKE=debian
+VERSION_CODENAME=orel
+HOME_URL="https://astralinux.ru/"

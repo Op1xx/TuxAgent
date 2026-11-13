@@ -1,0 +1,8 @@
+# Синтетическая фикстура: точный /etc/os-release на живой ALT не проверялся.
+NAME="ALT Workstation"
+VERSION="10.2"
+ID=altlinux
+ID_LIKE=alt
+VERSION_ID=10.2
+PRETTY_NAME="ALT Workstation 10.2"
+HOME_URL="https://www.basealt.ru/"

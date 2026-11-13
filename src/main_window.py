@@ -13,6 +13,7 @@ from PyQt6.QtWidgets import QDialog, QFrame, QLabel, QMenu, QMessageBox, QTextEd
 
 from chat_store import ChatMessage, ChatSession, ChatStore, format_chat_time, utc_now_iso
 from config import UI_DIR, AppSettings, ensure_runtime_dirs, load_settings, save_settings
+from distro import DistroDetectionError, detect_distro, resolve_distro
 from settings_dialog import SettingsDialog
 
 logger = logging.getLogger(__name__)
@@ -416,9 +417,25 @@ class MainWindow(QWidget):
                 self._store = ChatStore(new_settings.data_dir)
                 saved = self._save_chats()
             self.settings_changed.emit(self._settings)
+            warning = self._distro_warning()
+            if warning:
+                logger.warning("Профиль дистрибутива не совпадает с системой: %s", warning)
+                QMessageBox.warning(self, "Профиль дистрибутива", warning)
             if saved:
                 self.set_status("done", "Настройки сохранены")
                 QTimer.singleShot(2500, lambda: self.set_status("idle", "Ожидание запроса"))
+
+    def _distro_warning(self) -> str | None:
+        """Предупреждение, если ручной профиль не совпадает с системой."""
+        try:
+            detected = detect_distro()
+        except DistroDetectionError as error:
+            return str(error)
+        return resolve_distro(
+            detected,
+            self._settings.distro_mode,
+            self._settings.distro_override,
+        ).warning
 
     def eventFilter(self, watched: QObject, event: QEvent) -> bool:
         if watched in (self.promptInput, self.followupInput):

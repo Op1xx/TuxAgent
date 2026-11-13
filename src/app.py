@@ -18,6 +18,7 @@ from config import (
     ensure_runtime_dirs,
     load_settings,
 )
+from distro import DistroDetectionError, detect_distro, resolve_distro
 from logging_setup import configure_logging
 from main_window import MainWindow
 from version import __version__
@@ -91,6 +92,17 @@ def main(argv: list[str] | None = None) -> int:
     ensure_runtime_dirs(settings)
     configure_logging(settings)
     logger.info("Запуск TuxAgent %s", __version__)
+    try:
+        detected = detect_distro()
+        resolution = resolve_distro(
+            detected,
+            settings.distro_mode,
+            settings.distro_override,
+        )
+        if resolution.warning:
+            logger.warning("Профиль дистрибутива не совпадает с системой: %s", resolution.warning)
+    except DistroDetectionError as error:
+        logger.warning("Не удалось определить дистрибутив: %s", error)
     app = create_application(argv, settings)
     window = MainWindow(settings)
     window.settings_changed.connect(lambda new_settings: apply_stylesheet(app, new_settings))

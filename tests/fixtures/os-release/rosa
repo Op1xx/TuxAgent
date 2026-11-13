@@ -1,0 +1,8 @@
+# Синтетическая фикстура: точный /etc/os-release на живой ROSA не проверялся.
+NAME="ROSA Linux"
+VERSION="12.4"
+ID=rosa
+VERSION_ID=12.4
+PRETTY_NAME="ROSA Linux 12.4"
+ID_LIKE=rosa
+HOME_URL="https://www.rosalinux.ru/"

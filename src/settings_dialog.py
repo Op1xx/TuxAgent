@@ -17,6 +17,13 @@ from config import (
     AppSettings,
     default_models_dir,
 )
+from distro import (
+    FAMILY_LABELS,
+    DistroDetectionError,
+    DistroFamily,
+    DistroInfo,
+    detect_distro,
+)
 
 
 class SettingsDialog(QDialog):
@@ -25,6 +32,12 @@ class SettingsDialog(QDialog):
     def __init__(self, settings: AppSettings, parent: QWidget | None = None) -> None:
         super().__init__(parent)
         self._settings = settings
+        self._detected: DistroInfo | None = None
+        self._detection_error: str | None = None
+        try:
+            self._detected = detect_distro()
+        except DistroDetectionError as error:
+            self._detection_error = str(error)
         uic.loadUi(str(UI_DIR / "settings_dialog.ui"), self)
         self._fill_combos()
         self._load_values()
@@ -60,6 +73,7 @@ class SettingsDialog(QDialog):
         self.cancelBtn.clicked.connect(self.reject)
         self.saveBtn.clicked.connect(self.accept)
         self.distroMode.currentIndexChanged.connect(self._sync_enabled)
+        self.distroOverride.currentIndexChanged.connect(self._update_distro_hint)
         self.backendCombo.currentIndexChanged.connect(self._sync_enabled)
         self.browseModelBtn.clicked.connect(self._browse_model)
         self.browseDataBtn.clicked.connect(lambda: self._browse_dir(self.dataDir))
@@ -72,6 +86,42 @@ class SettingsDialog(QDialog):
         needs_file = self.backendCombo.currentData() == "llama_cpp"
         self.modelPath.setEnabled(needs_file)
         self.browseModelBtn.setEnabled(needs_file)
+        self._update_distro_hint()
+
+    def _update_distro_hint(self) -> None:
+        """Показать реальную систему и предупредить о ручном расхождении."""
+        if self._detected is None:
+            detail = self._detection_error or "неизвестная ошибка"
+            self.distroHint.setText(f"Не удалось определить систему: {detail}")
+            self.distroHint.setToolTip(detail)
+            return
+
+        detected = self._detected
+        parts = [
+            f"Система: {detected.display_name}",
+            f"семейство: {FAMILY_LABELS[detected.family]}",
+        ]
+        if detected.version_id:
+            parts.append(f"версия: {detected.version_id}")
+        text = " · ".join(parts) + "."
+
+        if self.distroMode.currentData() == "manual":
+            try:
+                selected = DistroFamily(str(self.distroOverride.currentData()))
+            except ValueError:
+                selected = DistroFamily.UNKNOWN
+            if selected is not detected.family:
+                text += (
+                    f" Выбран профиль «{FAMILY_LABELS[selected]}», он не совпадает "
+                    "с реальной системой: команды пакетного менеджера могут не подойти."
+                )
+            else:
+                text += " Выбранный профиль совпадает с реальной системой."
+        else:
+            text += " Режим «Авто»: семейство определяется по /etc/os-release."
+
+        self.distroHint.setText(text)
+        self.distroHint.setToolTip(text)
 
     def _browse_model(self) -> None:
         start = self.modelPath.text().strip()

@@ -16,7 +16,7 @@ UI_DIR = PROJECT_ROOT / "ui"
 RESOURCES_DIR = PROJECT_ROOT / "resources"
 FONTS_DIR = Path(__file__).resolve().parent / "fonts"
 
-# Семейства дистрибутивов из ТЗ. Детект появится на этапе 2.
+# Семейства дистрибутивов из ТЗ. Детект реализован в distro.py.
 DISTRO_CHOICES: dict[str, str] = {
     "debian": "Debian / Ubuntu / Astra Linux",
     "fedora": "Fedora / ROSA",

@@ -11,7 +11,9 @@
 
 ## Текущее состояние
 
-Этап 1 (каркас и GUI) завершён: `pyproject.toml`, плоский `src/`, тонкий `main.py`. `app.py` создаёт `QApplication`, грузит шрифты и тему (`resources/main.qss` или `resources/light.qss`), ставит глобальный обработчик ошибок и включает логирование. `main_window.py` — контроллер окна с созданием/переключением чатов, панелью задач слева и историей чатов справа; чаты сохраняются в `data/chats.json` через `chat_store.py`. `settings_dialog.py` — диалог настроек. Разметка: `ui/main_window.ui`, `ui/settings_dialog.ui`, `ui/chat_item.ui`, `ui/task_item.ui`. Логирование — `logging_setup.py`, audit-заготовка — `audit.py`. Агент и пакетные менеджеры пока не реализованы — не выдумывай существующую реализацию, создавай её по `TODO.md`.
+Этап 1 (каркас и GUI) завершён: `pyproject.toml`, плоский `src/`, тонкий `main.py`. `app.py` создаёт `QApplication`, грузит шрифты и тему (`resources/main.qss` или `resources/light.qss`), ставит глобальный обработчик ошибок и включает логирование. `main_window.py` — контроллер окна с созданием/переключением чатов, панелью задач слева и историей чатов справа; чаты сохраняются в `data/chats.json` через `chat_store.py`. `settings_dialog.py` — диалог настроек. Разметка: `ui/main_window.ui`, `ui/settings_dialog.ui`, `ui/chat_item.ui`, `ui/task_item.ui`. Логирование — `logging_setup.py`, audit-заготовка — `audit.py`.
+
+Этап 2 (дистрибутивы и пакетные менеджеры) реализован: `distro.py` разбирает `/etc/os-release` и определяет семейство, `package_managers.py` предоставляет `PackageManager` и бэкенды apt/dnf/pacman/zypper/ALT apt (+ опциональный epm), `CommandRunner` выполняет argv без shell и добавляет `pkexec` для root. Тесты и фикстуры — `tests/test_distro.py`, `tests/test_package_managers.py`, `tests/fixtures/os-release/`; матрица проверок — `docs/distro-support.md`. Live-проверка выполнена на Arch; Astra/ALT/ROSA ждут ВМ. Агент пока не реализован — не выдумывай существующую реализацию, создавай её по `TODO.md`.
 
 ## Окружение и команды
 

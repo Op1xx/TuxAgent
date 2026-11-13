@@ -11,6 +11,7 @@ from PyQt6.QtWidgets import QApplication
 
 from app import apply_stylesheet, create_application
 from config import AppSettings
+from distro import DistroFamily, DistroInfo
 from main_window import MainWindow, TaskItem
 from settings_dialog import SettingsDialog
 
@@ -103,6 +104,61 @@ def test_settings_dialog(qtbot, qapp: QApplication, settings: AppSettings) -> No
     assert result.data_dir == "/tmp/tuxagent-data"
     assert result.models_dir == "/tmp/tuxagent-models"
     assert result.theme == "light"
+
+
+def test_settings_dialog_shows_detected_system(
+    qtbot, qapp: QApplication, settings: AppSettings
+) -> None:
+    apply_stylesheet(qapp, settings)
+    dialog = SettingsDialog(settings)
+    qtbot.addWidget(dialog)
+
+    assert "Система:" in dialog.distroHint.text()
+    assert "семейство:" in dialog.distroHint.text()
+
+
+def test_settings_dialog_warns_about_distro_mismatch(
+    qtbot, qapp: QApplication, settings: AppSettings, monkeypatch
+) -> None:
+    import settings_dialog as settings_dialog_module
+
+    monkeypatch.setattr(
+        settings_dialog_module,
+        "detect_distro",
+        lambda: DistroInfo(id="arch", family=DistroFamily.ARCH),
+    )
+    dialog = SettingsDialog(settings)
+    qtbot.addWidget(dialog)
+
+    dialog.distroMode.setCurrentIndex(dialog.distroMode.findData("manual"))
+    dialog.distroOverride.setCurrentIndex(dialog.distroOverride.findData("debian"))
+
+    assert "не совпадает" in dialog.distroHint.text()
+    assert "Arch" in dialog.distroHint.text() or "arch" in dialog.distroHint.text()
+
+
+def test_main_window_builds_distro_warning(
+    qtbot, qapp: QApplication, settings: AppSettings, monkeypatch
+) -> None:
+    import main_window as main_window_module
+
+    monkeypatch.setattr(
+        main_window_module,
+        "detect_distro",
+        lambda: DistroInfo(id="arch", family=DistroFamily.ARCH),
+    )
+    manual = AppSettings(
+        distro_mode="manual",
+        distro_override="debian",
+        data_dir=settings.data_dir,
+        models_dir=settings.models_dir,
+    )
+    window = MainWindow(manual)
+    qtbot.addWidget(window)
+
+    warning = window._distro_warning()
+    assert warning is not None
+    assert "не подойти" in warning
 
 
 def test_new_chat_button_creates_chat(qtbot, qapp: QApplication, settings: AppSettings) -> None:
