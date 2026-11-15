@@ -6,6 +6,7 @@ import json
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any
 
 
 @dataclass(slots=True)
@@ -17,6 +18,8 @@ class AuditRecord:
     result: str
     returncode: int | None = None
     confirmed: bool = False
+    risk: str = ""
+    details: dict[str, Any] = field(default_factory=dict)
     timestamp: str = field(
         default_factory=lambda: datetime.now(UTC).isoformat(timespec="seconds")
     )

@@ -145,7 +145,11 @@ QFrame#statusDot[state="done"] { background: #2f8f5b; }
 QLabel#statusText[state="done"] { color: #2f8f5b; }
 
 /* ── настройки ── */
-QDialog#SettingsDialog { background: #f7f5fa; }
+QDialog#SettingsDialog, QDialog#ConfirmDialog { background: #f7f5fa; }
+QLabel#confirmTitle { font-family: "Space Grotesk"; font-size: 26px; font-weight: 700; color: #241f2c; }
+QLabel#confirmSubtitle { color: #6d6777; font-size: 11px; }
+QFrame[sectionCard="true"] { background: #ffffff; border: 1px solid #d6cfe2;
+  border-left: 3px solid #7b4bc4; border-radius: 4px; }
 QFrame#settingsTopbar { background: transparent; border: 0; border-bottom: 1px solid #ded7e8; }
 QLabel#settingsBrand { font-family: "Space Grotesk"; font-size: 13px; font-weight: 600; color: #2f2938; }
 QScrollArea#settingsScroll { background: transparent; border: 0; }

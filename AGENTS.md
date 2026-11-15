@@ -7,13 +7,18 @@
 - `docs/TuxAgentTTv1.md` — техническое задание (черновик, но главный источник требований).
 - `docs/*.pdf`, `docs/*.docx`, `docs/*.pptx` — материалы защиты. Бинарные: не редактировать, не считать спецификацией. При расхождении с ТЗ верно ТЗ.
 - `TODO.md` — трекер прогресса и следующий фокус. Обновлять после завершённых задач; чекбоксы могут опережать код — проверяй фактическое состояние файлов.
+- `docs/safety-and-tools.md` — правила `PathPolicy`, матрица риска, инструменты и audit.
 - `README.md` — краткое описание, не спецификация.
 
 ## Текущее состояние
 
-Этап 1 (каркас и GUI) завершён: `pyproject.toml`, плоский `src/`, тонкий `main.py`. `app.py` создаёт `QApplication`, грузит шрифты и тему (`resources/main.qss` или `resources/light.qss`), ставит глобальный обработчик ошибок и включает логирование. `main_window.py` — контроллер окна с созданием/переключением чатов, панелью задач слева и историей чатов справа; чаты сохраняются в `data/chats.json` через `chat_store.py`. `settings_dialog.py` — диалог настроек. Разметка: `ui/main_window.ui`, `ui/settings_dialog.ui`, `ui/chat_item.ui`, `ui/task_item.ui`. Логирование — `logging_setup.py`, audit-заготовка — `audit.py`.
+Этап 1 (каркас и GUI) завершён: `pyproject.toml`, плоский `src/`, тонкий `main.py`. `app.py` создаёт `QApplication`, грузит шрифты и тему (`resources/main.qss` или `resources/light.qss`), ставит глобальный обработчик ошибок и включает логирование. `main_window.py` — контроллер окна с созданием/переключением чатов, панелью задач слева и историей чатов справа; чаты сохраняются в `data/chats.json` через `chat_store.py`. `settings_dialog.py` — диалог настроек. Разметка: `ui/main_window.ui`, `ui/settings_dialog.ui`, `ui/chat_item.ui`, `ui/task_item.ui`, `ui/confirm_dialog.ui`. Логирование — `logging_setup.py`, audit-журнал — `audit.py`.
 
-Этап 2 (дистрибутивы и пакетные менеджеры) реализован: `distro.py` разбирает `/etc/os-release` и определяет семейство, `package_managers.py` предоставляет `PackageManager` и бэкенды apt/dnf/pacman/zypper/ALT apt (+ опциональный epm), `CommandRunner` выполняет argv без shell и добавляет `pkexec` для root. Тесты и фикстуры — `tests/test_distro.py`, `tests/test_package_managers.py`, `tests/fixtures/os-release/`; матрица проверок — `docs/distro-support.md`. Live-проверка выполнена на Arch; Astra/ALT/ROSA ждут ВМ. Агент пока не реализован — не выдумывай существующую реализацию, создавай её по `TODO.md`.
+Этап 2 (дистрибутивы и пакетные менеджеры) реализован: `distro.py` разбирает `/etc/os-release` и определяет семейство, `package_managers.py` предоставляет `PackageManager` и бэкенды apt/dnf/pacman/zypper/ALT apt (+ опциональный epm), `CommandRunner` выполняет argv без shell и добавляет `pkexec` для root. Тесты и фикстуры — `tests/test_distro.py`, `tests/test_package_managers.py`, `tests/fixtures/os-release/`; матрица проверок — `docs/distro-support.md`. Live-проверка выполнена на Arch; Astra/ALT/ROSA ждут ВМ.
+
+Этап 3 (инструменты и политика безопасности) реализован: `safety.py` содержит `PathPolicy`, `RiskLevel` (`safe`/`confirm`/`deny`) и проверку `realpath`/симлинков; `tools.py` — базовый `Tool` с JSON-схемой, `ToolPlan`, `ToolResult`, `ToolRegistry` и инструменты `find_files`, `list_dir`, `read_info`, `mkdir`, `move_to_trash`, guarded `delete`, а также пакетные инструменты поверх `PackageManager`; `audit.py` пишет JSONL с риском, argv и подтверждением; `ui/confirm_dialog.ui` + `confirm_dialog.py` — диалог подтверждения. Описание правил и матрицы риска — `docs/safety-and-tools.md`.
+
+Этап 4 (агентный цикл) реализован на `MockBackend`: `llm.py` описывает `Message`/`ToolCall`/`LLMResponse`/`LLMBackend` и отвечает по сценариям из `resources/mock_scenarios.json`; `agent.py` — планировщик и исполнитель с лимитами шагов/исправлений, двухфазным подтверждением, повтором `safe`-ошибок, таймаутом и отчётом `AgentReport`; `agent_worker.py` выполняет одну фазу в `QThread`; `main_window.py` показывает статусы «думаю/выполняю/жду подтверждения/готово/ошибка», обновляет панель задач и пишет отчёт в чат. Реальные бэкенды `llama.cpp`/Ollama поднимают `BackendNotImplementedError` — это этап 5. Описание цикла — `docs/agent-loop.md`, известные упрощения — `docs/agent-notes.md`.
 
 ## Окружение и команды
 
@@ -52,19 +57,21 @@ src/
   app.py                 # QApplication, загрузка .ui/.qss
   chat_store.py          # история чатов в data/chats.json
   config.py              # настройки приложения
+  confirm_dialog.py      # контроллер диалога подтверждения
   logging_setup.py       # файловое логирование в data/logs
   audit.py               # audit-журнал JSONL
   main_window.py         # контроллер главного окна
   settings_dialog.py     # контроллер диалога настроек
-  agent.py               # агентный цикл
+  agent.py               # агентный цикл: шаги, подтверждение, отчёт
+  agent_worker.py        # AgentTask(QThread): одна фаза цикла в фоне
   llm.py                 # LLMBackend: mock, llama.cpp, Ollama
   distro.py              # определение дистрибутива
   package_managers.py    # apt, dnf, pacman, zypper, ALT
-  tools.py               # типизированные инструменты
-  safety.py              # политика, верификация, dry-run
+  tools.py               # Tool, ToolPlan, файловые и пакетные инструменты
+  safety.py              # PathPolicy, RiskLevel, проверка путей
   version.py             # __version__
 ui/                      # только *.ui (Qt Designer)
-resources/               # *.qss, иконки
+resources/               # *.qss, иконки, mock_scenarios.json
 tests/                   # pytest, фикстуры
 data/                    # runtime: логи, audit, кэш; в git не хранится
 ```
@@ -78,16 +85,18 @@ data/                    # runtime: логи, audit, кэш; в git не хра�
 
 - Разметка — только `ui/*.ui` (Qt Designer), стили — только `resources/*.qss`. Запрещено собирать окна вручную в Python и держать стили в коде.
 - Темы: `resources/main.qss` (тёмная) и `resources/light.qss` (светлая, та же фиолетовая палитра). Новые диалоги оформляются теми же object-name/свойствами, что и `main_window.ui`, и должны читаться в обеих темах.
-- `main_window.py` — контроллер: сигналы/слоты, без прямых вызовов пакетных менеджеров. `settings_dialog.py` — только чтение/запись полей диалога, настройки хранит `config.py` (QSettings).
+- `main_window.py` — контроллер: сигналы/слоты, без прямых вызовов пакетных менеджеров. `settings_dialog.py` — только чтение/запись полей диалога, настройки хранит `config.py` (QSettings). `confirm_dialog.py` показывает `ToolPlan` (что затронуто, обратимость, причина, предпросмотр) и не выполняет действия сам.
 - Панель задач слева (`tasksPanel`, шаблон `ui/task_item.ui`) обновляется через `set_tasks()`/`set_task_context()`; не создавать отдельное окно плана.
 - Чаты создаются динамически из `ui/chat_item.ui`, история хранится в `<data_dir>/chats.json` (`chat_store.py`). Удаление — кнопкой `×` или через ПКМ, всегда с подтверждением. После удаления последнего чата колонка закрывается, а новый чат создаётся при первом запросе. Имя нового чата сейчас — первые 40 символов запроса (заглушка); позже LLM будет сама придумывать короткое название.
 - Долгие операции — в worker/QThread, главный поток GUI не блокировать.
 
 ## Поток выполнения
 
-`запрос → планировщик → tool calls → проверка политики → dry-run (если нужен) → выполнение → проверка результата → отчёт`
+`запрос → планировщик → tool calls → Tool.plan → проверка политики → dry-run (если нужен) → подтверждение (если нужно) → Tool.execute → проверка результата → audit → отчёт`
 
 Модель предлагает только вызовы инструментов из известного набора; исполняет их код приложения. Успех операции подтверждается фактической проверкой состояния системы (пакет установлен, файл существует/удалён), а не текстом модели.
+
+Цикл двухфазный: `Agent.start()` останавливается на плане, требующем подтверждения, а GUI показывает диалог и вызывает `Agent.resume(allowed)`. Цикл не зависит от Qt; каждая фаза выполняется в `AgentTask(QThread)`. Подробности и лимиты — `docs/agent-loop.md`.
 
 ## Безопасность (жёсткие правила)
 
@@ -97,8 +106,9 @@ data/                    # runtime: логи, audit, кэш; в git не хра�
 - Неоднозначный запрос — уточняющий вопрос, а не подтверждение. «Удали все временные файлы» без папки и критерия не выполнять: нужен путь и критерий (например, `~/Downloads`, старше 30 дней).
 - Не удалять файлы по предположению «это не нужно». Если действие обратимо — сначала корзина/бэкап.
 - Защищённые пути: `/`, `/etc`, `/usr`, `/boot`, `/dev`, `/proc`, `/sys`, `/var/lib`. Рекурсивные операции по ним запрещены; проверять `realpath` и симлинки.
+- `PathPolicy` классифицирует операции как `safe`/`confirm`/`deny`: чтение и `mkdir` внутри `~`/`/tmp` — `safe`; запись вне них — `confirm`; удаление/перемещение вне `~`/`/tmp` и любые изменения защищённых путей — `deny`; удаление/перемещение внутри — `confirm`. Корень `/` защищён только сам по себе, иначе любой путь считался бы вложенным.
 - Для root-операций — `pkexec`/polkit, а не `sudo` в терминале: GUI не должен блокироваться на вводе пароля.
-- Каждое выполненное действие писать в audit log (JSONL) в `data/`: время, инструмент, argv, результат, код возврата.
+- Каждое выполненное действие писать в audit log (JSONL) в `data/`: время, инструмент, argv, результат, код возврата, подтверждение, риск и детали.
 - Не выдавать предположение за факт; при ошибке сообщать, что именно не сработало и что проверено.
 
 ## Дистрибутивы и пакетные менеджеры
@@ -138,7 +148,9 @@ data/                    # runtime: логи, audit, кэш; в git не хра�
 - `pytest`; никаких реальных `apt`/`dnf`/`pacman`/`zypper`, сети и root.
 - `subprocess` мокать; фикстуры `/etc/os-release` — в `tests/fixtures/os-release/`.
 - Обязательные тесты: детект дистрибутивов, сборка argv, политика путей (symlink/`..`), решение о подтверждении, валидация tool-call.
-- GUI-тесты — с `QT_QPA_PLATFORM=offscreen`, маркер `gui`; на первом этапе достаточно smoke-теста импорта/окна.
+- Этап 3: `tests/test_safety.py` (PathPolicy и обходы), `tests/test_tools.py` (инструменты, audit, фейковый `PackageManager`), offscreen-тест диалога подтверждения в `tests/test_gui.py`.
+- Этап 4: `tests/test_llm.py` (сценарии и ошибки JSON), `tests/test_agent.py` (шаги, подтверждение/отмена, лимиты, повторы, таймаут, блокировка пакетных операций, отчёт), GUI-тесты цикла в `tests/test_gui.py` с `agent_factory`.
+- GUI-тесты — с `QT_QPA_PLATFORM=offscreen`, маркер `gui`; фоновые фазы агента ждать через `qtbot.waitUntil` по `statusText.property("state")`.
 - Ответы модели не тестировать детерминированно: для этого `MockBackend`.
 
 ## Git и артефакты

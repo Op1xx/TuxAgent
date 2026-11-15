@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "fallback": {
+    "reply": "Mock-бэкенд не нашёл подходящий сценарий. Примеры запросов: «что в ~/Downloads», «найди *.pdf в ~/Documents», «установи firefox», «удали пакет firefox», «удали файл ~/tmp/test.txt», «очисти кэш пакетов»."
+  },
+  "scenarios": [
+    {
+      "name": "list-dir",
+      "match": [
+        "покажи (?:папку|каталог) (?P<path>[~/.][^\\s,;]*)",
+        "что (?:в|лежит в) (?:папке |каталоге )?(?P<path>[~/.][^\\s,;]*)"
+      ],
+      "steps": [
+        {"tool": "list_dir", "arguments": {"path": "{path}"}},
+        {"reply": "Список содержимого {path} показан выше."}
+      ]
+    },
+    {
+      "name": "find-files",
+      "match": [
+        "найди (?P<pattern>[\\w.*?-]+) в (?:папке |каталоге )?(?P<path>[~/.][^\\s,;]*)"
+      ],
+      "steps": [
+        {"tool": "find_files", "arguments": {"path": "{path}", "pattern": "{pattern}"}},
+        {"reply": "Поиск «{pattern}» в {path} завершён."}
+      ]
+    },
+    {
+      "name": "search-package",
+      "match": [
+        "найди пакет (?P<query>[\\w.+-]+)"
+      ],
+      "steps": [
+        {"tool": "package_search", "arguments": {"query": "{query}"}},
+        {"reply": "Результаты поиска пакета «{query}» показаны выше."}
+      ]
+    },
+    {
+      "name": "install-package",
+      "match": [
+        "(?:установи|поставь) (?:пакет )?(?P<package>[\\w.+-]+)"
+      ],
+      "steps": [
+        {"tool": "package_is_installed", "arguments": {"package": "{package}"}},
+        {"tool": "package_install", "arguments": {"packages": ["{package}"]}},
+        {"reply": "Пакет {package} установлен. Проверка подтвердила результат."}
+      ]
+    },
+    {
+      "name": "remove-package",
+      "match": [
+        "(?:удали|убери) пакет (?P<package>[\\w.+-]+)"
+      ],
+      "steps": [
+        {"tool": "package_remove", "arguments": {"packages": ["{package}"]}},
+        {"reply": "Пакет {package} удалён."}
+      ]
+    },
+    {
+      "name": "delete-file",
+      "match": [
+        "удали файл (?P<path>[~/.][^\\s,;]*)"
+      ],
+      "steps": [
+        {"tool": "delete", "arguments": {"path": "{path}", "recursive": false}},
+        {"reply": "Файл {path} удалён."}
+      ]
+    },
+    {
+      "name": "clean-cache",
+      "match": [
+        "очисти кэш(?: пакетов)?"
+      ],
+      "steps": [
+        {"tool": "package_clean_cache", "arguments": {}},
+        {"reply": "Кэш пакетного менеджера очищен."}
+      ]
+    },
+    {
+      "name": "update-index",
+      "match": [
+        "обнови индекс(?: пакетов)?"
+      ],
+      "steps": [
+        {"tool": "package_update_index", "arguments": {}},
+        {"reply": "Индекс пакетов обновлён."}
+      ]
+    }
+  ]
+}

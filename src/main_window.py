@@ -3,18 +3,26 @@
 from __future__ import annotations
 
 import logging
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 
 from PyQt6 import uic
 from PyQt6.QtCore import QEvent, QObject, QPoint, Qt, QTimer, pyqtSignal
-from PyQt6.QtGui import QContextMenuEvent, QKeyEvent, QMouseEvent, QResizeEvent
+from PyQt6.QtGui import QCloseEvent, QContextMenuEvent, QKeyEvent, QMouseEvent, QResizeEvent
 from PyQt6.QtWidgets import QDialog, QFrame, QLabel, QMenu, QMessageBox, QTextEdit, QWidget
 
+from agent import Agent, AgentEvent, AgentTurn
+from agent_worker import AgentTask
+from audit import AuditLogger
 from chat_store import ChatMessage, ChatSession, ChatStore, format_chat_time, utc_now_iso
 from config import UI_DIR, AppSettings, ensure_runtime_dirs, load_settings, save_settings
+from confirm_dialog import ConfirmDialog
 from distro import DistroDetectionError, detect_distro, resolve_distro
+from llm import LLMError, create_backend
+from package_managers import PackageManagerError, create_package_manager_for_settings
+from safety import PathPolicy
 from settings_dialog import SettingsDialog
+from tools import ToolRegistry, default_tools
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +34,44 @@ TASK_MARKERS = {
 }
 PANEL_BREAKPOINT = 1080
 AUTO_CHAT_NAME_LIMIT = 40
+
+
+def build_agent(settings: AppSettings) -> Agent:
+    """Собрать агента под текущие настройки.
+
+    Пакетный менеджер может отсутствовать: тогда агент работает с файловыми
+    инструментами, а изменяющие пакетные операции блокируются. При ручном
+    профиле дистрибутива, не совпадающем с системой, изменяющие пакетные
+    операции тоже блокируются (правило из ``AGENTS.md``).
+    """
+    manager = None
+    warning: str | None = None
+    try:
+        detected = detect_distro()
+        resolution = resolve_distro(
+            detected,
+            settings.distro_mode,
+            settings.distro_override or None,
+        )
+        warning = resolution.warning
+        selection = create_package_manager_for_settings(
+            detected,
+            settings.distro_mode,
+            settings.distro_override or None,
+        )
+        manager = selection.manager
+        warning = warning or selection.warning
+    except DistroDetectionError as error:
+        logger.warning("Не удалось определить дистрибутив: %s", error)
+        warning = str(error)
+    except PackageManagerError as error:
+        logger.warning("Пакетный менеджер недоступен: %s", error)
+
+    policy = PathPolicy()
+    audit = AuditLogger(settings.data_dir)
+    registry = ToolRegistry(default_tools(policy=policy, manager=manager, audit=audit))
+    backend = create_backend(settings.llm_backend)
+    return Agent(backend, registry, package_ops_allowed=warning is None)
 
 
 @dataclass(slots=True)
@@ -42,7 +88,13 @@ class MainWindow(QWidget):
 
     settings_changed = pyqtSignal(object)
 
-    def __init__(self, settings: AppSettings | None = None, parent: QWidget | None = None) -> None:
+    def __init__(
+        self,
+        settings: AppSettings | None = None,
+        parent: QWidget | None = None,
+        *,
+        agent_factory: Callable[[AppSettings], Agent] | None = None,
+    ) -> None:
         super().__init__(parent)
         self._settings = settings or load_settings()
         uic.loadUi(str(UI_DIR / "main_window.ui"), self)
@@ -51,6 +103,9 @@ class MainWindow(QWidget):
         self._active_chat_id: str | None = None
         self._chat_items: list[QFrame] = []
         self._task_widgets: list[QFrame] = []
+        self._agent_factory = agent_factory or build_agent
+        self._agent: Agent | None = None
+        self._task: AgentTask | None = None
         self._connect_signals()
         self._update_panel_buttons()
         self.set_status("idle", "Ожидание запроса")
@@ -107,6 +162,18 @@ class MainWindow(QWidget):
             self.tasksPanel.setVisible(False)
             self._update_panel_buttons()
 
+    def closeEvent(self, event: QCloseEvent) -> None:
+        """Отменить цикл и дождаться текущей фазы перед выходом."""
+        agent = self._agent
+        if agent is not None:
+            agent.cancel()
+        task = self._task
+        if task is not None and task.isRunning() and not task.wait(5000):
+            # Фаза не успела завершиться: не даём Qt уничтожить работающий поток.
+            task.terminate()
+            task.wait(1000)
+        super().closeEvent(event)
+
     def set_status(self, state: str, text: str) -> None:
         """Обновить статус: idle, thinking, running, waiting, error, done."""
         self.statusText.setText(text)
@@ -119,6 +186,18 @@ class MainWindow(QWidget):
         style = widget.style()
         style.unpolish(widget)
         style.polish(widget)
+
+    def _flash_status(self, text: str, delay: int = 2000) -> None:
+        """Показать сообщение и вернуть статус в idle, если окно ещё живо.
+
+        Таймер привязан к окну, поэтому при закрытии он уничтожается вместе с
+        ним и не пытается обратиться к удалённым виджетам.
+        """
+        self.set_status("done", text)
+        timer = QTimer(self)
+        timer.setSingleShot(True)
+        timer.timeout.connect(lambda: self.set_status("idle", "Ожидание запроса"))
+        timer.start(delay)
 
     def set_task_context(self, chat_name: str, context: str) -> None:
         """Показать имя чата и контекст текущей задачи."""
@@ -263,8 +342,7 @@ class MainWindow(QWidget):
             self.sidebar.setVisible(False)
             self._update_panel_buttons()
             if saved:
-                self.set_status("done", "Чат удалён")
-                QTimer.singleShot(2000, lambda: self.set_status("idle", "Ожидание запроса"))
+                self._flash_status("Чат удалён")
             return
 
         if was_active:
@@ -278,8 +356,7 @@ class MainWindow(QWidget):
             self.stack.setCurrentIndex(1 if active.messages else 0)
             self.set_task_context(active.name, self._task_preview(active))
         if saved:
-            self.set_status("done", "Чат удалён")
-            QTimer.singleShot(2000, lambda: self.set_status("idle", "Ожидание запроса"))
+            self._flash_status("Чат удалён")
 
     def _show_chat_menu(self, chat_id: str, global_pos: QPoint) -> None:
         menu = QMenu(self)
@@ -353,20 +430,105 @@ class MainWindow(QWidget):
         self._chats.remove(chat)
         self._chats.insert(0, chat)
         command = ChatMessage(kind="command", text=f"› {text}")
-        info = ChatMessage(
-            kind="info",
-            text="Запрос принят интерфейсом. Агентный цикл будет подключён на этапе 4.",
-        )
-        chat.messages.extend((command, info))
+        chat.messages.append(command)
         saved = self._save_chats()
         self._rebuild_chat_list()
 
         self.stack.setCurrentIndex(1)
         self.set_task_context(chat.name, self._task_preview(chat))
         self._append_message(command.kind, command.text)
-        self._append_message(info.kind, info.text)
         if saved:
-            self.set_status("idle", "Ожидание запроса")
+            self.set_status("thinking", "Думаю…")
+        self._start_agent(chat.id, text)
+
+    def _start_agent(self, chat_id: str, request: str) -> None:
+        """Собрать агента и запустить первую фазу запроса."""
+        try:
+            agent = self._agent_factory(self._settings)
+        except (LLMError, PackageManagerError) as error:
+            self._append_agent_message(chat_id, "info", f"Агент недоступен: {error}")
+            self.set_status("error", "Агент недоступен")
+            self._save_chats()
+            return
+        self._agent = agent
+        self._set_busy(True)
+        self.set_status("thinking", "Думаю…")
+        self._run_phase(chat_id, lambda: agent.start(request))
+
+    def _run_phase(self, chat_id: str, work: Callable[[], AgentTurn]) -> None:
+        """Выполнить одну фазу цикла в фоне, не блокируя окно."""
+        task = AgentTask(work, self)
+        task.finished_turn.connect(lambda turn: self._on_turn(chat_id, turn))
+        task.failed.connect(lambda message: self._on_agent_failure(chat_id, message))
+        task.finished.connect(lambda: self._on_task_finished(task))
+        self._task = task
+        task.start()
+
+    def _on_task_finished(self, task: AgentTask) -> None:
+        if self._task is task:
+            self._task = None
+        task.deleteLater()
+
+    def _on_turn(self, chat_id: str, turn: AgentTurn) -> None:
+        """Применить события хода и либо спросить подтверждение, либо закончить."""
+        for event in turn.events:
+            self._apply_event(chat_id, event)
+        self._save_chats()
+        self._rebuild_chat_list()
+
+        if turn.pending is not None:
+            self.set_status("waiting", "Жду подтверждения")
+            allowed = ConfirmDialog.ask(turn.pending, self)
+            agent = self._agent
+            if agent is None:
+                self._set_busy(False)
+                return
+            self.set_status("thinking", "Продолжаю…")
+            self._run_phase(chat_id, lambda: agent.resume(allowed))
+            return
+
+        self._set_busy(False)
+        self._agent = None
+
+    def _on_agent_failure(self, chat_id: str, message: str) -> None:
+        logger.warning("Агентный цикл завершился ошибкой: %s", message)
+        self._append_agent_message(chat_id, "info", f"Ошибка агента: {message}")
+        self.set_status("error", "Ошибка агента")
+        self._set_busy(False)
+        self._save_chats()
+        self._agent = None
+
+    def _apply_event(self, chat_id: str, event: AgentEvent) -> None:
+        if event.kind == "status":
+            self.set_status(event.state, event.text)
+        elif event.kind == "message":
+            self._append_agent_message(chat_id, event.message_kind, event.text)
+        elif event.kind == "tasks":
+            self.set_tasks(
+                [TaskItem(step.title, step.status, step.detail) for step in event.tasks]
+            )
+
+    def _append_agent_message(self, chat_id: str, kind: str, text: str) -> None:
+        """Добавить сообщение агента в историю и, если чат активен, в ленту."""
+        if not text:
+            return
+        chat = self._chat_by_id(chat_id)
+        if chat is None:
+            return
+        chat.messages.append(ChatMessage(kind=kind, text=text))
+        chat.updated_at = utc_now_iso()
+        if chat.id == self._active_chat_id:
+            self._append_message(kind, text)
+
+    def _set_busy(self, busy: bool) -> None:
+        """Заблокировать ввод, пока цикл выполняется."""
+        for widget in (
+            self.promptInput,
+            self.followupInput,
+            self.promptSend,
+            self.followupSend,
+        ):
+            widget.setEnabled(not busy)
 
     def _append_message(self, kind: str, text: str) -> None:
         label = QLabel(text, self.transcriptContent)
@@ -378,11 +540,18 @@ class MainWindow(QWidget):
         QTimer.singleShot(0, self._scroll_transcript_to_bottom)
 
     def _scroll_transcript_to_bottom(self) -> None:
-        bar = self.transcript.verticalScrollBar()
-        bar.setValue(bar.maximum())
+        try:
+            bar = self.transcript.verticalScrollBar()
+            bar.setValue(bar.maximum())
+        except RuntimeError:
+            # Окно уже закрыто, прокручивать нечего.
+            return
 
     def reset_session(self) -> None:
         """Очистить сообщения активного чата и вернуться на стартовый экран."""
+        if self._agent is not None:
+            self._agent.cancel()
+        self._set_busy(False)
         chat = self._active_chat()
         saved = True
         if chat is not None:
@@ -422,8 +591,7 @@ class MainWindow(QWidget):
                 logger.warning("Профиль дистрибутива не совпадает с системой: %s", warning)
                 QMessageBox.warning(self, "Профиль дистрибутива", warning)
             if saved:
-                self.set_status("done", "Настройки сохранены")
-                QTimer.singleShot(2500, lambda: self.set_status("idle", "Ожидание запроса"))
+                self._flash_status("Настройки сохранены", 2500)
 
     def _distro_warning(self) -> str | None:
         """Предупреждение, если ручной профиль не совпадает с системой."""

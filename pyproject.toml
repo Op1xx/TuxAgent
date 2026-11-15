@@ -18,10 +18,12 @@ tuxagent = "app:main"
 package-dir = {"" = "src"}
 py-modules = [
     "agent",
+    "agent_worker",
     "app",
     "audit",
     "chat_store",
     "config",
+    "confirm_dialog",
     "distro",
     "llm",
     "logging_setup",
@@ -48,10 +50,12 @@ select = ["E", "F", "I", "UP", "B", "SIM"]
 [tool.ruff.lint.isort]
 known-first-party = [
     "agent",
+    "agent_worker",
     "app",
     "audit",
     "chat_store",
     "config",
+    "confirm_dialog",
     "distro",
     "llm",
     "logging_setup",
